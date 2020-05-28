@@ -3,26 +3,19 @@ import Layout from '../../Layout'
 import gql from 'graphql-tag'
 import { Query } from 'react-apollo'
 import PhotoGallery from '../../components/photoGallery/PhotoGallery'
-import AlbumTitle from '../../components/AlbumTitle'
 
 const photoQuery = gql`
   query allPhotosPage {
-    myAlbums(filter: { order_by: "title", order_direction: ASC, limit: 100 }) {
-      title
+    myPhotos(filter: { order_by: "title", order_direction: DESC }) {
       id
-      photos(
-        filter: { order_by: "photo.title", order_direction: DESC, limit: 12 }
-      ) {
-        id
-        title
-        thumbnail {
-          url
-          width
-          height
-        }
-        highRes {
-          url
-        }
+      title
+      thumbnail {
+        url
+        width
+        height
+      }
+      highRes {
+        url
       }
     }
   }
@@ -94,12 +87,10 @@ class PhotosPage extends Component {
 
             let galleryGroups = []
 
-            this.albums = data.myAlbums
-
-            if (data.myAlbums) {
-              galleryGroups = data.myAlbums.map((album, index) => (
+            if (data.myPhotos) {
+              this.albums = [{ id: 0, photos: data.myPhotos, title: 0 }]
+              galleryGroups = this.albums.map((album, index) => (
                 <div key={album.id}>
-                  <AlbumTitle album={album} />
                   <PhotoGallery
                     onSelectImage={photoIndex => {
                       this.setActiveImage(index, photoIndex)
@@ -124,10 +115,9 @@ class PhotosPage extends Component {
 
             let activeImage = null
             if (this.state.activeAlbumIndex != -1) {
-              activeImage =
-                data.myAlbums[this.state.activeAlbumIndex].photos[
-                  this.state.activePhotoIndex
-                ].id
+              activeImage = this.albums[this.state.activeAlbumIndex].photos[
+                this.state.activePhotoIndex
+              ].id
             }
 
             return <div>{galleryGroups}</div>
